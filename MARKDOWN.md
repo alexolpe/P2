@@ -5,7 +5,7 @@ MARKDOWN.md es un fichero de texto escrito con un formato denominado _**Markdown
 característica de este formato es que, manteniendo la legibilidad cuando se visualiza con herramientas en 
 modo texto (`more`, `less`, editores varios, ...), permite amplias posibilidades de visualización con
 formato en una amplia gama de aplicaciones; muy notablemente, **GitHub**, **Doxygen** y **Facebook**
-(ciertamente, :eyes:).
+(ciertamente, :tree:).
 
 
 Encabezados y marcadores de sección
