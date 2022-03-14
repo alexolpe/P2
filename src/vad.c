@@ -69,8 +69,8 @@ VAD_STATE vad_close(VAD_DATA *vad_data) {
   /* 
    * TODO: decide what to do with the last undecided frames
    */
-  VAD_STATE state = vad_data->state;
-
+  VAD_STATE state = vad_data->last_state;
+  //VAD_STATE state=vad_data->state;
   free(vad_data);
   return state;
 }
@@ -98,20 +98,38 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x) {
   switch (vad_data->state) {
   case ST_INIT:
     vad_data->state = ST_SILENCE;
-    vad_data->p1=f.p+8; //em posat un umbral de 10
+    vad_data->p1=f.p+5; //em posat un umbral de 10
+    vad_data->p2=vad_data->p1+1;
+    vad_data->num_UNDEF=0;
     break;
 
   case ST_SILENCE:
-    if (f.p > vad_data->p1)
-      vad_data->state = ST_VOICE;
+    if (f.p > vad_data->p1){
+      //vad_data->last_state=vad_data->state;
+      vad_data->state = ST_UNDEF;
+      vad_data->num_UNDEF+=1;
+    }
     break;
 
   case ST_VOICE:
-    if (f.p < vad_data->p1)
-      vad_data->state = ST_SILENCE;
+    if (f.p < vad_data->p2){
+      vad_data->state = ST_UNDEF;
+      vad_data->num_UNDEF+=1;
+    }
     break;
 
   case ST_UNDEF:
+    if(f.p>vad_data->p2){
+      vad_data->state=ST_VOICE;
+      vad_data->num_UNDEF=0;
+    }
+    if(f.p<vad_data->p1){
+      vad_data->state=ST_SILENCE;
+      vad_data->num_UNDEF=0;
+    }
+    if(vad_data->num_UNDEF>3){
+      vad_data->state=vad_data->last_state;
+    }
     break;
   }
 

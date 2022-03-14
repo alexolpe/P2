@@ -13,10 +13,13 @@ const char *state2str(VAD_STATE st);
 
 typedef struct {
   VAD_STATE state;
+  VAD_STATE last_state;
+  int num_UNDEF;
   float sampling_rate;
   unsigned int frame_length;
   float last_feature; /* for debuggin purposes */
   float p1;//anadido
+  float p2;
 } VAD_DATA;
 
 /* Call this function before using VAD: 
