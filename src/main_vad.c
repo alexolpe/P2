@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
   float frame_duration;   /* in seconds */
   float alpha1;
   unsigned int t, last_t; /* in frames */
+  unsigned int compt = 0;
 
   char *input_wav, *output_vad, *output_wav;
 
@@ -93,14 +94,16 @@ int main(int argc, char *argv[])
     {
       /* TODO: copy all the samples into sndfile_out */
     }
-
-    state = vad(vad_data, buffer);
+    state = vad(vad_data, buffer, compt);
+    compt++;
     // printf("state: %s\n", state2str(state));
     if (verbose & DEBUG_VAD)
       vad_show_state(vad_data, stdout);
 
     /* TODO: print only SILENCE and VOICE labels */
     /* As it is, it prints UNDEF segments but is should be merge to the proper value */
+    //intento trobar els llindars de soroll optims
+
     if (state != last_state) {
 
       if(state == ST_VOICE){
@@ -111,6 +114,10 @@ int main(int argc, char *argv[])
           last_state = ST_SILENCE;
           vad_data->last_state=ST_SILENCE;
       }
+        if(state == ST_INIT){
+          last_state = ST_SILENCE;
+          vad_data->last_state = ST_SILENCE;
+        }
 
       if (t != last_t){
         fprintf(vadfile, "%.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration, state2str(last_state));

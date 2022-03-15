@@ -64,7 +64,7 @@ VAD_DATA * vad_open(float rate, float alpha1) {
   vad_data->sampling_rate = rate;
   vad_data->frame_length = rate * FRAME_TIME * 1e-3;
   vad_data->alpha1 = alpha1;
-  printf("%f\n", vad_data->alpha1);
+ 
   return vad_data;
 }
 
@@ -87,7 +87,7 @@ unsigned int vad_frame_size(VAD_DATA *vad_data) {
  * using a Finite State Automata
  */
 
-VAD_STATE vad(VAD_DATA *vad_data, float *x) {
+VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t) {
 
   /* 
    * TODO: You can change this, using your own features,
@@ -100,10 +100,25 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x) {
 
   switch (vad_data->state) {
   case ST_INIT:
-    vad_data->state = ST_SILENCE;
-    vad_data->p1=f.p+vad_data->alpha1; //em posat un umbral de 10
-    vad_data->p2=vad_data->p1+1;
-    vad_data->num_UNDEF=0;
+ 
+    if(t<10){
+        vad_data->power_llindar[t] = f.p;
+    }
+    else if(t == 10){
+      int llindar = 0;
+        for(int i= 0; i<10; i++){
+        llindar = vad_data->power_llindar[i] +llindar;
+      }
+      vad_data->p1 = (llindar/10) + vad_data->alpha1;
+      printf("%f\n", vad_data->p1);
+      vad_data->state = ST_SILENCE;
+      //vad_data->p1=f.p+vad_data->alpha1; //em posat un umbral de 10
+      vad_data->p2=vad_data->p1+5;
+    }
+    
+    
+    
+
     break;
 
   case ST_SILENCE:
