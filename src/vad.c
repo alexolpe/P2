@@ -28,6 +28,7 @@ typedef struct {
   float zcr;
   float p;
   float am;
+  
 } Features;
 
 /* 
@@ -98,20 +99,31 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x) {
   switch (vad_data->state) {
   case ST_INIT:
     vad_data->state = ST_SILENCE;
-    vad_data->p1=f.p+6; //em posat un umbral de 10
+    vad_data->p1_k1=f.p+5; //em posat un umbral de 10
+    vad_data->p1_k2=f.p +6;
     break;
 
   case ST_SILENCE:
-    if (f.p > vad_data->p1)
-      vad_data->state = ST_VOICE;
+    if (f.p > vad_data->p1_k1)
+      vad_data->state = ST_UNDEF;
+    if (f.p < vad_data->p1_k1)
+      vad_data->state = ST_SILENCE;    
     break;
 
   case ST_VOICE:
-    if (f.p < vad_data->p1)
-      vad_data->state = ST_SILENCE;
+    if ((f.p < vad_data->p1_k2) && (f.p > vad_data->p1_k1))
+      vad_data->state = ST_UNDEF;
+    if (f.p > vad_data->p1_k2)
+      vad_data->state = ST_VOICE;
     break;
 
   case ST_UNDEF:
+    if(f.p < vad_data->p1_k2)
+      vad_data->state = ST_SILENCE;
+    if(f.p > vad_data->p1_k2)
+      vad_data->state = ST_VOICE;
+    else
+      vad_data->state = ST_UNDEF;
     break;
   }
 
