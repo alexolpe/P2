@@ -10,6 +10,8 @@ Options:
    -o FILE, --output-vad=FILE  Label file with the result of VAD
    -w FILE, --output-wav=FILE  WAVE file with silences cleared
    -1 FLOAT, --alpha1=FLOAT    Increment per determinar el llindar de desició [default: 10]
+   -2 FLOAT, --alpha2=FLOAT    Increment per determinar el segon llindar de desicio
+   -r FLOAT, --refsil=FLOAT    Nombre de trames per analitzar el silenci
    -v, --verbose  Show debug information
    -h, --help     Show this screen
    --version      Show the version of the project
