@@ -18,10 +18,10 @@ typedef struct {
   float sampling_rate;
   unsigned int frame_length;
   float last_feature; /* for debuggin purposes */
-  float p1;//anadido
+  float p1;
   float p2;
   float alpha1;
-  float power_llindar[10];
+  float* power_llindar[];
 } VAD_DATA;
 
 /* Call this function before using VAD: 

@@ -114,10 +114,10 @@ int main(int argc, char *argv[])
           last_state = ST_SILENCE;
           vad_data->last_state=ST_SILENCE;
       }
-        if(state == ST_INIT){
+        /*if(state == ST_INIT){
           last_state = ST_SILENCE;
           vad_data->last_state = ST_SILENCE;
-        }
+        }*/
 
       if (t != last_t){
         fprintf(vadfile, "%.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration, state2str(last_state));
