@@ -118,7 +118,7 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
     else
     {
       vad_data->p1 = 10 * log10(vad_data->watts / t) + vad_data->alpha1;
-      vad_data->p2 = vad_data->p1 + vad_data->alpha2; // alpha2
+      vad_data->p2 = 10 * log10(vad_data->watts / t) + vad_data->alpha2; // alpha2
       vad_data->zcr = vad_data->zcr / t;
       vad_data->state = ST_SILENCE;
     }
@@ -132,10 +132,10 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
 
       vad_data->state = ST_UNDEF_MV;
     }
-    else if (f.p > vad_data->p2)
+    /*else if (f.p > vad_data->p2)
     {
       vad_data->state = ST_VOICE;
-    }
+    }*/
 
     break;
 
@@ -147,10 +147,10 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
     {
       vad_data->state = ST_UNDEF_MS;
     }
-    else if (f.p < vad_data->p1 && vad_data->zcr > f.zcr)
+    /*else if (f.p < vad_data->p1 && vad_data->zcr > f.zcr)
     {
       vad_data->state = ST_SILENCE;
-    }
+    }*/
     break;
 
   case ST_UNDEF_MS:
