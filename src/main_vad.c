@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     buffer_zeros[i] = 0.0F;
 
   frame_duration = (float)frame_size / (float)sf_info.samplerate;
-  last_state = ST_SILENCE;
+  last_state = ST_UNDEF_MS;
 
   for (t = last_t = 0;; t++)
   { /* For each frame ... */
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     if (state != last_state)
     {
 
-      /*if (state == ST_VOICE)
+      if (state == ST_VOICE)
       {
         last_state = ST_VOICE;
         vad_data->last_state = ST_VOICE;
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
       {
         last_state = ST_SILENCE;
         vad_data->last_state = ST_SILENCE;
-      }*/
+      }
 
       if (t != last_t)
       {

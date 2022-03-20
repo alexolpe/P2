@@ -16,7 +16,7 @@ const float FRAME_TIME = 20.0F; /* in ms. */
  */
 
 const char *state_str[] = {
-     "S", "V", "INIT"};
+    "S", "V", "INIT", "MV", "MS"};
 
 const char *state2str(VAD_STATE st)
 {
@@ -113,6 +113,7 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
     {
       vad_data->watts += pow(10, f.p / 10);
       vad_data->zcr += f.zcr;
+      // printf("%f\n", vad_data->p1);
     }
     else
     {
@@ -125,11 +126,11 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
 
   case ST_SILENCE:
 
-    //vad_data->num_UNDEF = 0;
+    vad_data->num_UNDEF = 0;
     if (f.p > vad_data->p1)
     {
 
-      vad_data->state = ST_VOICE;
+      vad_data->state = ST_UNDEF_MV;
     }
     /*else if (f.p > vad_data->p2)
     {
@@ -140,11 +141,11 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
 
   case ST_VOICE:
 
-    //vad_data->num_UNDEF = 0;
+    vad_data->num_UNDEF = 0;
 
-    if (f.p < vad_data->p1 /*&& vad_data->zcr > f.zcr*/)
+    if (f.p < vad_data->p2 && vad_data->zcr > f.zcr)
     {
-      vad_data->state = ST_VOICE;
+      vad_data->state = ST_UNDEF_MS;
     }
     /*else if (f.p < vad_data->p1 && vad_data->zcr > f.zcr)
     {
@@ -152,7 +153,7 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
     }*/
     break;
 
-  /*case ST_UNDEF_MS:
+  case ST_UNDEF_MS:
 
     vad_data->num_UNDEF += 1;
     if (f.p < vad_data->p1)
@@ -186,16 +187,12 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
     }
 
     break;
-
-  case ST_UNDEF:
-
-    break;*/
   }
 
   if (vad_data->state == ST_SILENCE ||
-      vad_data->state == ST_VOICE /*||
+      vad_data->state == ST_VOICE ||
       vad_data->state == ST_UNDEF_MS ||
-      vad_data->state == ST_UNDEF_MV*/)
+      vad_data->state == ST_UNDEF_MV)
     return vad_data->state;
 
   else if (vad_data->state == ST_INIT)
