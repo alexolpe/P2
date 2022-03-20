@@ -7,8 +7,8 @@
 #include "pav_analysis.h"
 #include "vad.h"
 
-const float FRAME_TIME = 20.0F; /* in ms. */
-
+//const float FRAME_TIME = 10.0F; /* in ms. */
+//Comentamos la linea 10 porque buscamos el valor óptimo de FRAME_TIME y lo pasamos por linea de comandos
 /*
  * As the output state is only ST_VOICE, ST_SILENCE, or ST_UNDEF,
  * only this labels are needed. You need to add all labels, in case
@@ -48,7 +48,6 @@ Features compute_features(const float *x, int N)
    * For the moment, compute random value between 0 and 1
    */
   Features feat;
-  // feat.zcr = feat.p = feat.am = (float) rand()/RAND_MAX;
   feat.zcr = compute_zcr(x, N, 16000);
   feat.am = compute_am(x, N);
   feat.p = compute_power(x, N);
@@ -60,12 +59,12 @@ Features compute_features(const float *x, int N)
  * TODO: Init the values of vad_data
  */
 
-VAD_DATA *vad_open(float rate, float alpha1, float alpha2, float refsil)
+VAD_DATA *vad_open(float rate, float alpha1, float alpha2, float refsil, float framer)
 {
   VAD_DATA *vad_data = malloc(sizeof(VAD_DATA));
   vad_data->state = ST_INIT;
   vad_data->sampling_rate = rate;
-  vad_data->frame_length = rate * FRAME_TIME * 1e-3;
+  vad_data->frame_length = rate * framer * 1e-3;
   vad_data->alpha1 = alpha1;
   vad_data->alpha2 = alpha2;
   vad_data->refsil = refsil;
@@ -109,83 +108,51 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
   {
 
   case ST_INIT:
-    if (t < vad_data->refsil)
-    {
+    if (t < vad_data->refsil){
       vad_data->watts += pow(10, f.p / 10);
       vad_data->zcr += f.zcr;
-      // printf("%f\n", vad_data->p1);
-    }
-    else
-    {
+    }else{
       vad_data->p1 = 10 * log10(vad_data->watts / t) + vad_data->alpha1;
-      vad_data->p2 = 10 * log10(vad_data->watts / t) + vad_data->alpha2; // alpha2
+      vad_data->p2 = 10 * log10(vad_data->watts / t) + vad_data->alpha2; 
       vad_data->zcr = vad_data->zcr / t;
       vad_data->state = ST_SILENCE;
     }
     break;
 
   case ST_SILENCE:
-
     vad_data->num_UNDEF = 0;
-    if (f.p > vad_data->p1)
-    {
-
+    if (f.p > vad_data->p1){
       vad_data->state = ST_UNDEF_MV;
     }
-    /*else if (f.p > vad_data->p2)
-    {
-      vad_data->state = ST_VOICE;
-    }*/
-
     break;
 
   case ST_VOICE:
-
     vad_data->num_UNDEF = 0;
-
-    if (f.p < vad_data->p2 && vad_data->zcr > f.zcr)
-    {
+    if (f.p < vad_data->p2 && vad_data->zcr > f.zcr){
       vad_data->state = ST_UNDEF_MS;
     }
-    /*else if (f.p < vad_data->p1 && vad_data->zcr > f.zcr)
-    {
-      vad_data->state = ST_SILENCE;
-    }*/
     break;
 
   case ST_UNDEF_MS:
-
     vad_data->num_UNDEF += 1;
-    if (f.p < vad_data->p1)
-    {
+    if (f.p < vad_data->p1){
       vad_data->state = ST_SILENCE;
-    }
-    else if (f.p > vad_data->p2)
-    {
+    }else if (f.p > vad_data->p2){
+      vad_data->state = ST_VOICE;
+    }else if (vad_data->num_UNDEF > 1){
       vad_data->state = ST_VOICE;
     }
-    else if (vad_data->num_UNDEF > 1)
-    {
-      vad_data->state = ST_VOICE;
-    }
-
     break;
+
   case ST_UNDEF_MV:
-
     vad_data->num_UNDEF += 1;
-    if (f.p < vad_data->p1)
-    {
+    if (f.p < vad_data->p1){
       vad_data->state = ST_SILENCE;
-    }
-    else if (f.p > vad_data->p2)
-    {
+    }else if (f.p > vad_data->p2){
       vad_data->state = ST_VOICE;
-    }
-    else if (vad_data->num_UNDEF > 1)
-    {
+    }else if (vad_data->num_UNDEF > 1){
       vad_data->state = ST_SILENCE;
     }
-
     break;
   }
 

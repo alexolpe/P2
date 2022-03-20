@@ -18,6 +18,7 @@ typedef struct {
     /* options with arguments */
     char *alpha1;
     char *alpha2;
+    char *framer;
     char *input_wav;
     char *output_vad;
     char *output_wav;
@@ -42,6 +43,7 @@ const char help_message[] =
 "   -1 FLOAT, --alpha1=FLOAT    Increment per determinar el llindar de desició [default: 10]\n"
 "   -2 FLOAT, --alpha2=FLOAT    Increment per determinar el segon llindar de desicio\n"
 "   -r FLOAT, --refsil=FLOAT    Nombre de trames per analitzar el silenci\n"
+"   -f FLOAT, --framer=FLOAT    Framerate\n"
 "   -v, --verbose  Show debug information\n"
 "   -h, --help     Show this screen\n"
 "   --version      Show the version of the project\n"
@@ -282,6 +284,9 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
         } else if (!strcmp(option->olong, "--alpha2")) {
             if (option->argument)
                 args->alpha2 = option->argument;
+        } else if (!strcmp(option->olong, "--framer")) {
+            if (option->argument)
+                args->framer = option->argument;
         } else if (!strcmp(option->olong, "--input-wav")) {
             if (option->argument)
                 args->input_wav = option->argument;
@@ -314,7 +319,7 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
 
 DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
     DocoptArgs args = {
-        0, 0, 0, (char*) "10", NULL, NULL, NULL, NULL, NULL,
+        0, 0, 0, (char*) "10", NULL, NULL, NULL, NULL, NULL, NULL,
         usage_pattern, help_message
     };
     Tokens ts;
@@ -328,12 +333,13 @@ DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
         {NULL, "--version", 0, 0, NULL},
         {"-1", "--alpha1", 1, 0, NULL},
         {"-2", "--alpha2", 1, 0, NULL},
+        {"-f", "--framer", 1, 0, NULL},
         {"-i", "--input-wav", 1, 0, NULL},
         {"-o", "--output-vad", 1, 0, NULL},
         {"-w", "--output-wav", 1, 0, NULL},
         {"-r", "--refsil", 1, 0, NULL}
     };
-    Elements elements = {0, 0, 9, commands, arguments, options};
+    Elements elements = {0, 0, 10, commands, arguments, options};
 
     ts = tokens_new(argc, argv);
     if (parse_args(&ts, &elements))
