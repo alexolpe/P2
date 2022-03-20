@@ -43,4 +43,20 @@ El **estado maybe voice** decide que si la potencia de una trama es menor que la
 El **estado maybe silence** utliza las mismas decisiones que el estado maybevoice con la diferencia que si hay más de dos tramas seguidas en este mismo estado se les asigna a ambas voz directamente.
 
 
+Resultados.
+----------------------------------------------
+
+Para obtener los mejores resultados primero se deben obtener los parámetros alpha1, alpha2 y refsil óptimos. Para eso utlizamos el comando for descrito anteriormente. La mejor combinación de estos tres parámetros ha sido alpha1 = 9, alpha2 = 3 y refsil = 5. Si se corre el progrmaa scripts/run_vad.sh 9 3 5 obtenemos el siguiente resultado:
+
+![Captura5](https://user-images.githubusercontent.com/91128741/159157405-fa0df55b-b01d-48e0-9bda-25e006d7a71a.JPG)
+
+Vemos que es un porcentaje de acierto bastante elevado ya que utlizamos el detector con una base de datos muy grande y los parámetros utlizados no serán los mejores para cada caso en particular. Hemos diseñado un detector autómata que encuentra los parámetros que mejor se adaptan para tratar esta base de datos.
+
+Se puede ver el percentaje de acierto que tiene nuestro detector cuando comparamos nuestro audio.
+
+![unknown](https://user-images.githubusercontent.com/91128741/159158074-c1c437b8-c3d7-44e1-96bd-ac3699c852f2.png)
+
+Este resultado no es el mejor que podemos obtener para este caso pero nos interesa la combinación de parámetros que mejoren el F-Score de toda la base de datos no de un solo fichero.
+
+
 
