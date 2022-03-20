@@ -43,4 +43,14 @@ El **estado maybe voice** decide que si la potencia de una trama es menor que la
 El **estado maybe silence** utliza las mismas decisiones que el estado maybevoice con la diferencia que si hay más de dos tramas seguidas en este mismo estado se les asigna a ambas voz directamente.
 
 
+Resultados.
+----------------------------------------------
+
+Para obtener los mejores resultados primero se deben obtener los parámetros alpha1, alpha2 y refsil óptimos. Para eso utlizamos el comando for descrito anteriormente. La mejor combinación de estos tres parámetros ha sido alpha1 = 9, alpha2 = 3 y refsil = 5. Si se corre el progrmaa scripts/run_vad.sh 9 3 5 obtenemos el siguiente resultado:
+
+![Captura5](https://user-images.githubusercontent.com/91128741/159157405-fa0df55b-b01d-48e0-9bda-25e006d7a71a.JPG)
+
+
+
+
 
