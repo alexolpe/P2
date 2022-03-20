@@ -21,9 +21,11 @@ int main(int argc, char *argv[])
   VAD_STATE state, last_state;
 
   float *buffer, *buffer_zeros;
-  int frame_size;         /* in samples */
-  float frame_duration;   /* in seconds */
+  int frame_size;       /* in samples */
+  float frame_duration; /* in seconds */
   float alpha1;
+  float alpha2;
+  float refsil;
   unsigned int t, last_t; /* in frames */
   unsigned int compt = 0;
 
@@ -36,6 +38,8 @@ int main(int argc, char *argv[])
   output_vad = args.output_vad;
   output_wav = args.output_wav;
   alpha1 = atof(args.alpha1);
+  alpha2 = atof(args.alpha2);
+  refsil = atof(args.refsil);
 
   if (input_wav == 0 || output_vad == 0)
   {
@@ -73,7 +77,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  vad_data = vad_open(sf_info.samplerate, alpha1);
+  vad_data = vad_open(sf_info.samplerate, alpha1, alpha2, refsil);
   /* Allocate memory for buffers */
   frame_size = vad_frame_size(vad_data);
   buffer = (float *)malloc(frame_size * sizeof(float));
@@ -82,7 +86,7 @@ int main(int argc, char *argv[])
     buffer_zeros[i] = 0.0F;
 
   frame_duration = (float)frame_size / (float)sf_info.samplerate;
-  last_state = ST_UNDEF;
+  last_state = ST_SILENCE;
 
   for (t = last_t = 0;; t++)
   { /* For each frame ... */
@@ -93,6 +97,7 @@ int main(int argc, char *argv[])
     if (sndfile_out != 0)
     {
       /* TODO: copy all the samples into sndfile_out */
+      sf_write_float(sndfile_out, buffer, frame_size);
     }
     state = vad(vad_data, buffer, compt);
     compt++;
@@ -102,24 +107,24 @@ int main(int argc, char *argv[])
 
     /* TODO: print only SILENCE and VOICE labels */
     /* As it is, it prints UNDEF segments but is should be merge to the proper value */
-    //intento trobar els llindars de soroll optims
+    // intento trobar els llindars de soroll optims
 
-    if (state != last_state) {
+    if (state != last_state)
+    {
 
-      if(state == ST_VOICE){
-          last_state = ST_VOICE;
-          vad_data->last_state=ST_VOICE;
+      /*if (state == ST_VOICE)
+      {
+        last_state = ST_VOICE;
+        vad_data->last_state = ST_VOICE;
       }
-        if(state == ST_SILENCE){
-          last_state = ST_SILENCE;
-          vad_data->last_state=ST_SILENCE;
-      }
-        /*if(state == ST_INIT){
-          last_state = ST_SILENCE;
-          vad_data->last_state = ST_SILENCE;
-        }*/
+      if (state == ST_SILENCE)
+      {
+        last_state = ST_SILENCE;
+        vad_data->last_state = ST_SILENCE;
+      }*/
 
-      if (t != last_t){
+      if (t != last_t)
+      {
         fprintf(vadfile, "%.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration, state2str(last_state));
       }
       last_state = state;
@@ -129,8 +134,15 @@ int main(int argc, char *argv[])
     if (sndfile_out != 0)
     {
       /* TODO: go back and write zeros in silence segments */
+      // sf_read_float(sndfile_out, proba, sizeof(proba));
+
+        if (sndfile_out != 0 && state == ST_SILENCE) {
+       sf_seek(sndfile_out, frame_size, SEEK_CUR);
+       sf_write_float(sndfile_out, buffer_zeros, frame_size);
+      }
     }
   }
+
   state = vad_close(vad_data);
   /* TODO: what do you want to print, for last frames? */
   if (t != last_t)
